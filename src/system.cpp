@@ -3,6 +3,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <cmath>
 
 #include "process.h"
 #include "processor.h"
@@ -21,13 +22,29 @@ Processor& System::Cpu() {
 
 // TODO: Return a container composed of the system's processes
 vector<Process>& System::Processes() { 
-  std::vector<int> vec_pids=LinuxParser::Pids();
+  std::vector<int> vec_pids{LinuxParser::Pids()};
+
+/*
+  set<int> ant_pids;
+  for(Process const& pr : processes_) {
+      ant_pids.insert(pr.Pid());
+  }
+  
+  // Add new pids
+  for(int pid: vec_pids){
+      if(ant_pids.find(pid) == ant_pids.end())
+      processes_.emplace_back(Process(pid));
+  }
+*/
   processes_.clear();
+
   for(auto pid: vec_pids) 
   {
       Process process(pid);
       processes_.push_back(process);
   }
+  
+  std::sort(processes_.begin(),processes_.end(),std::less<Process>());
 
   return processes_; 
 }

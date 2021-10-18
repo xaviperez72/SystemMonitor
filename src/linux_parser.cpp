@@ -1,10 +1,13 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <sstream>
+#include <fstream>
 #include <iostream>
+#include <filesystem>
 #include <string>
 #include <vector>
 #include <chrono>
+
 
 #include "linux_parser.h"
 
@@ -55,6 +58,8 @@ string LinuxParser::Kernel() {
 // VERIFIED OK
 vector<int> LinuxParser::Pids() {
   vector<int> pids;
+  
+  // ----------------
   DIR* directory = opendir(kProcDirectory.c_str());
   struct dirent* file;
   while ((file = readdir(directory)) != nullptr) {
@@ -69,6 +74,13 @@ vector<int> LinuxParser::Pids() {
     }
   }
   closedir(directory);
+  // ----------------
+
+
+  const std::filesystem::path proc_dir{kProcDirectory.c_str()};
+  for(auto const& dir_entry: std::filesytem ::directory_iterator{proc_dir})
+    
+
   return pids;
 }
 
@@ -93,7 +105,8 @@ float LinuxParser::MemoryUtilization() {
   }
    mem_free_perc = (float) (mem[1] * 100) / mem[0];
   uti = 100.0 - mem_free_perc;
-  return uti; 
+  uti /= 100.0;
+   return uti; 
 }
 
 
@@ -140,7 +153,7 @@ long LinuxParser::ActiveJiffies() {
   {
      value += std::stol(str);
   }
-  return 0; 
+  return value; 
   // ProcDirectory+kStatFilename line by line and in there the 4th and 5th value in a line are idle jiffies and the rest can be counted as active jiffies.
 }
 
@@ -234,8 +247,9 @@ long LinuxParser::ActiveJiffies(int pid) {
       }
     }
   }
+  value = value / sysconf(_SC_CLK_TCK);
   return value;
-  }
+}
 
 // TODO: Read and return the command associated with a process
 // REMOVE: [[maybe_unused]] once you define the function
@@ -320,5 +334,6 @@ long LinuxParser::UpTime(int pid) {
       }
     }
   }
+  value = value / sysconf(_SC_CLK_TCK);
   return value;
 }

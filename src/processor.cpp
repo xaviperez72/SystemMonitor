@@ -13,17 +13,15 @@ long convert_stol(string s) { return std::stol(s);}
 
 // TODO: Return the aggregate CPU utilization
 float Processor::Utilization() { 
-    float PrevIdle, Idle, PrevNonIdle, NonIdle, PrevTotal, Total, totald, idled, CPU_Percentage;
-    vector<string> a = LinuxParser::CpuUtilization();
-    std::vector<long>  prev;
-    prev.resize(a.size());                       
-    std::transform(a.begin(), a.end(), prev.begin(), convert_stol);     // Move all string a to prev.
-
-    sleep(1);
+    // static int counter=0;
     std::vector<std::string> b = LinuxParser::CpuUtilization();    
     std::vector<long>  curr;
-    curr.resize(b.size());                       
+    curr.resize(b.size());
     std::transform(b.begin(), b.end(), curr.begin(), convert_stol);     // Move all string b to curr.
+
+    if(prev.size()==0) {
+        prev.resize(b.size());      // Avoid coredump at the first time
+    }
 
 // Extracted from:
 // https://stackoverflow.com/questions/23367857/accurate-calculation-of-cpu-usage-given-in-percentage-in-linux
@@ -50,6 +48,24 @@ float Processor::Utilization() {
         idled = Idle - PrevIdle;
 
         CPU_Percentage = (totald - idled)/totald;
+/*
+    cout << "PrevIdle   :|" << PrevIdle  << "|\n";
+    cout << "Idle       :|" << Idle  << "|\n";
+    cout << "PrevNonIdle:|" << PrevNonIdle  << "|\n";
+    cout << "NonIdle    :|" << NonIdle  << "|\n";
+    cout << "PrevTotal  :|" << PrevTotal  << "|\n";
+    cout << "Total      :|" << Total  << "|\n";
+    cout << "totald     :|" << totald  << "|\n";
+    cout << "idled      :|" << idled  << "|\n";
+
+    if(++counter > 2)
+        exit(1);
+    else
+        sleep(5);
+
+    cout << "CPU_Percentage:|" << CPU_Percentage  << "|\n";*/
+
+    prev = curr;
 
     return CPU_Percentage; 
 }

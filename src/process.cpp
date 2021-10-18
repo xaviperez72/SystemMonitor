@@ -7,6 +7,7 @@
 
 #include "process.h"
 #include "linux_parser.h"
+#include "format.h"
 
 using namespace std;
 void Salida(string str, string value) 
@@ -22,47 +23,50 @@ Process::Process(int pid)
     ram_ = LinuxParser::Ram(pid);
     total_time_ = LinuxParser::ActiveJiffies(pid);
     start_time_ = LinuxParser::UpTime(pid);
-    /* 
-    Salida("PID", to_string(pid));
-    Salida("COMMAND", command_);
-    Salida("USER", user_);
-    Salida("RAM", ram_);
-    Salida("TOTAL_TIME", to_string(total_time_));
-    Salida("START_TIME", to_string(start_time_));
-*/
-    // sleep(5);
+    long sys_uptime=LinuxParser::UpTime();              
+    seconds_ = (float)sys_uptime - ((float)start_time_);
 }
 
 // TODO: Return this process's ID
-int Process::Pid() { 
+int Process::Pid() const { 
     return pid_;
 }
 
 // TODO: Return this process's CPU utilization
 float Process::CpuUtilization() const { 
+    float cpu_usage;
     long sys_uptime=LinuxParser::UpTime();              
-    long Hertz = sysconf(_SC_CLK_TCK);
-    float seconds = (float)sys_uptime - ((float)start_time_ / (float)Hertz);
-    float cpu_usage = 100 * ((total_time_ / (float)Hertz) / seconds);
+    // long Hertz = sysconf(_SC_CLK_TCK);
+    // float seconds = (float)sys_uptime - ((float)start_time_ / (float)Hertz);
+    
+    float seconds = (float)sys_uptime - ((float)start_time_);
+    // float cpu_usage = 100 * (total_time_  / seconds);
+    
+    if(seconds != 0.0)
+        cpu_usage = total_time_  / seconds;
+    else
+        cpu_usage = 0;
+
     return cpu_usage;
 }
 
 // TODO: Return the command that generated this process
-string Process::Command() { 
+string Process::Command() const{ 
     return command_; 
 }
 
 // TODO: Return this process's memory utilization
-string Process::Ram() { 
-    return ram_;
+string Process::Ram(){ 
+    long ram=stol(ram_) / 1024;
+    return to_string(ram);
 }
 
 // TODO: Return the user (name) that generated this process
-string Process::User() { 
+string Process::User() const{ 
     return user_; 
 }
 
 // TODO: Return the age of this process (in seconds)
 long int Process::UpTime() { 
-    return start_time_;
+    return seconds_;
  }
