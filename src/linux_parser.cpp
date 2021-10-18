@@ -59,7 +59,7 @@ string LinuxParser::Kernel() {
 vector<int> LinuxParser::Pids() {
   vector<int> pids;
   
-  // ----------------
+  
   DIR* directory = opendir(kProcDirectory.c_str());
   struct dirent* file;
   while ((file = readdir(directory)) != nullptr) {
@@ -74,13 +74,6 @@ vector<int> LinuxParser::Pids() {
     }
   }
   closedir(directory);
-  // ----------------
-
-
-  const std::filesystem::path proc_dir{kProcDirectory.c_str()};
-  for(auto const& dir_entry: std::filesytem ::directory_iterator{proc_dir})
-    
-
   return pids;
 }
 
